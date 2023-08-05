@@ -9,6 +9,8 @@ import {
     codeExtensionPath,
     featureTestRunnerPath,
     integrationTestRunnerPath,
+    lspIntegrationTestRunnerPath,
+    lspToolsHostTestPath,
     mochaPath,
     rootPath,
     testAssetsRootPath,
@@ -69,6 +71,8 @@ gulp.task(
 // TODO: Enable lsp integration tests once tests for unimplemented features are disabled.
 gulp.task('test', gulp.series('test:feature', 'test:unit', 'test:integration:stdio'));
 
+gulp.task('test:integration:slnWithCsproj:lsptoolshost', async () => runLspIntegrationTest('slnWithCsproj'));
+
 async function runIntegrationTest(testAssetName: string, engine: 'stdio' | 'lsp') {
     const env = {
         OSVC_SUITE: testAssetName,
@@ -82,6 +86,27 @@ async function runIntegrationTest(testAssetName: string, engine: 'stdio' | 'lsp'
     };
 
     const result = await spawnNode([integrationTestRunnerPath, '--enable-source-maps'], { env, cwd: rootPath });
+
+    if (result.code === null || result.code > 0) {
+        // Ensure that gulp fails when tests fail
+        throw new Error(`Exit code: ${result.code}  Signal: ${result.signal}`);
+    }
+
+    return result;
+}
+
+async function runLspIntegrationTest(testAssetName: string) {
+    const env = {
+        OSVC_SUITE: testAssetName,
+        CODE_TESTS_PATH: path.join(lspToolsHostTestPath, 'lspToolsHostIntegrationTests'),
+        CODE_EXTENSIONS_PATH: codeExtensionPath,
+        CODE_TESTS_WORKSPACE: path.join(testAssetsRootPath, testAssetName),
+        CODE_WORKSPACE_ROOT: rootPath,
+        CODE_DISABLE_EXTENSIONS: 'true',
+    };
+
+    console.log(`TEST PATH: '${env.CODE_TESTS_PATH}'\n EXTENSIONS PATH: '${env.CODE_EXTENSIONS_PATH}'`);
+    const result = await spawnNode([lspIntegrationTestRunnerPath, '--enable-source-maps'], { env, cwd: rootPath });
 
     if (result.code === null || result.code > 0) {
         // Ensure that gulp fails when tests fail

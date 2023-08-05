@@ -23,4 +23,6 @@ export const featureTestRunnerPath = path.join(testRootPath, 'runFeatureTests.js
 export const integrationTestRunnerPath = path.join(testRootPath, 'runIntegrationTests.js');
 export const testAssetsRootPath = path.join(rootPath, 'test', 'integrationTests', 'testAssets');
 
+export const lspToolsHostTestPath = path.join(rootPath, 'out', 'lsptoolshosttest');
+export const lspIntegrationTestRunnerPath = path.join(lspToolsHostTestPath, 'runLspIntegrationTests.js');
 export const nodePath = path.join(process.env.NVM_BIN ? `${process.env.NVM_BIN}${path.sep}` : '', 'node');
